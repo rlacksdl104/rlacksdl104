@@ -15,7 +15,7 @@ Here are some ideas to get you started:
 - 😄 Pronouns: ...
 - ⚡ Fun fact: ...
 -->
-
+<div>  
 ![header](https://capsule-render.vercel.app/api?type=Cylinder&text=rlacksdl104)
 
 <h2 align='center'><i><a href="https://github.com/rlacksdl104">Activity Graph 📈</i></h2>
@@ -27,3 +27,6 @@ Here are some ideas to get you started:
  <img src="https://github-readme-activity-graph.vercel.app/graph?username=rlacksdl104&theme=dracula&area=true&hide_border=true#gh-dark-mode-only" width="100%">
 </a>
 </p>
+
+![Anurag's GitHub stats](https://github-readme-stats.vercel.app/api?username=rlacksdl104&show_icons=true&theme=dark)
+</div>
