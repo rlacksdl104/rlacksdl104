@@ -15,9 +15,8 @@ Here are some ideas to get you started:
 - 😄 Pronouns: ...
 - ⚡ Fun fact: ...
 -->
-<div>  
+<div align="center">  
 ![header](https://capsule-render.vercel.app/api?type=Cylinder&text=rlacksdl104)
-
 <h2 align='center'><i><a href="https://github.com/rlacksdl104">Activity Graph 📈</i></h2>
   <p align="center">
 <a href="https://github.com/rlacksdl104/github-readme-activity-graph#gh-light-mode-only">
