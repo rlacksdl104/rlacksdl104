@@ -28,4 +28,9 @@ Here are some ideas to get you started:
 </p>
 
 ![Anurag's GitHub stats](https://github-readme-stats.vercel.app/api?username=rlacksdl104&show_icons=true&theme=dark)
+<span>
+  <a href="https://www.instagram.com/rlaxan2/">
+    <img src="https://img.shields.io/badge/Instagram-ff69b4?style=plastic&logo=Instagram&logoColor=white"/>
+  </a>
+</span>
 </div>
