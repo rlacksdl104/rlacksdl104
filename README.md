@@ -25,8 +25,6 @@ Here are some ideas to get you started:
  <img src="https://github-readme-activity-graph.vercel.app/graph?username=rlacksdl104&theme=dracula&area=true&hide_border=true#gh-dark-mode-only" width="100%">
 </a>
 </p>
-<p>
-![Anurag's GitHub stats](https://github-readme-stats.vercel.app/api?username=rlacksdl104&show_icons=true&theme=dark
-</p>
+![Anurag's GitHub stats](https://github-readme-stats.vercel.app/api?username=rlacksdl10408&show_icons=true&theme=dark)
 
 </div>
