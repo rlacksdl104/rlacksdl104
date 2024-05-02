@@ -24,8 +24,8 @@ Here are some ideas to get you started:
 <a href="https://github.com/rlacksdl104/github-readme-activity-graph#gh-dark-mode-only">
  <img src="https://github-readme-activity-graph.vercel.app/graph?username=rlacksdl104&theme=dracula&area=true&hide_border=true#gh-dark-mode-only" width="100%">
 </a>
-  ![Anurag's GitHub stats](https://github-readme-stats.vercel.app/api?username=min-su08&show_icons=true&theme=dark)
 </p>
+  ![Anurag's GitHub stats](https://github-readme-stats.vercel.app/api?username=min-su08&show_icons=true&theme=dark)
 
 
 </div>
