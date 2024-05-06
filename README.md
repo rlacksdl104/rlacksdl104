@@ -15,6 +15,9 @@ Here are some ideas to get you started:
 - 😄 Pronouns: ...
 - ⚡ Fun fact: ...
 -->
+
+<h1>rlacksdl104's git</h1>
+
 <div align="center">  
 <h2 align='center'><i><a href="https://github.com/rlacksdl104">Activity Graph 📈</i></h2>
   <p align="center">
@@ -28,5 +31,6 @@ Here are some ideas to get you started:
 </div>
   
 ![Anurag's GitHub stats](https://github-readme-stats.vercel.app/api?username=rlacksdl104&show_icons=true&theme=dark)
+<img src="![image](https://github.com/rlacksdl104/rlacksdl104/assets/164007520/7f430522-2afa-4894-8a2b-07e5cf1c14a7)">
 
-<h1>rlacksdl104</h1>
+
