@@ -18,7 +18,7 @@ Here are some ideas to get you started:
 
 <h1>rlacksdl104's git</h1>
 
-<div align="center">  
+<div align="center">   
 <h2 align='center'><i><a href="https://github.com/rlacksdl104">Activity Graph 📈</i></h2>
   <p align="center">
 <a href="https://github.com/rlacksdl104/github-readme-activity-graph#gh-light-mode-only">
