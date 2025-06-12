@@ -34,11 +34,3 @@ Here are some ideas to get you started:
 <img src="![image](https://github.com/rlacksdl104/rlacksdl104/assets/164007520/7f430522-2afa-4894-8a2b-07e5cf1c14a7)">
 ![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=rlacksdl104&layout=compact)
 
-#
-
-<details>
-  <summary><strong>Comments / 댓글 +</strong></summary>
-
-[![Comments / 댓글](https://github-comment.injun.dev/api/user/rlacksdl104/svg?theme=black)](https://github-comment.injun.dev/rlacksdl104)
-
-</details>
