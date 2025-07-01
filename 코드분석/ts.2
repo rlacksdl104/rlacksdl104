@@ -1,0 +1,658 @@
+// ==================== 타입 정의 섹션 ====================
+// 여기서 애플리케이션 전체에서 쓸 타입들 정의함
+
+/**
+ * 작업 우선순위 enum
+ * 타입 안전성 보장하고 코드 가독성 올림
+ */
+enum TaskPriority {
+  LOW = 'low',        // 낮은 우선순위
+  MEDIUM = 'medium',  // 중간 우선순위  
+  HIGH = 'high',      // 높은 우선순위
+  URGENT = 'urgent'   // 긴급 우선순위
+}
+
+/**
+ * 작업 상태 enum
+ * 작업 진행 상황 추적함
+ */
+enum TaskStatus {
+  TODO = 'todo',           // 할 일
+  IN_PROGRESS = 'in_progress', // 진행 중
+  COMPLETED = 'completed',     // 완료됨
+  CANCELLED = 'cancelled'      // 취소됨
+}
+
+/**
+ * 작업 카테고리 enum
+ * 작업 분류해서 관리 쉽게 만듦
+ */
+enum TaskCategory {
+  WORK = 'work',         // 업무
+  PERSONAL = 'personal', // 개인
+  STUDY = 'study',       // 학습
+  HEALTH = 'health',     // 건강
+  FINANCE = 'finance'    // 재정
+}
+
+/**
+ * 개별 작업 인터페이스
+ * 작업의 모든 속성 정의해서 타입 안전성 보장함
+ */
+interface Task {
+  id: string;                    // 작업 고유 식별자
+  title: string;                 // 작업 제목
+  description?: string;          // 작업 설명 (옵션)
+  priority: TaskPriority;        // 작업 우선순위
+  status: TaskStatus;            // 작업 상태
+  category: TaskCategory;        // 작업 카테고리
+  dueDate?: Date;               // 마감일 (옵션)
+  createdAt: Date;              // 작업 생성일
+  updatedAt: Date;              // 작업 수정일
+  assignedTo?: string;          // 담당자 (옵션)
+  tags: string[];               // 태그 배열
+  estimatedHours?: number;      // 예상 소요 시간 (옵션)
+  actualHours?: number;         // 실제 소요 시간 (옵션)
+}
+
+/**
+ * 작업 생성 요청 인터페이스
+ * Task에서 일부 속성 제외하고 일부는 옵션으로 만듦
+ */
+interface CreateTaskRequest {
+  title: string;                 // 필수: 작업 제목
+  description?: string;          // 옵션: 작업 설명
+  priority: TaskPriority;        // 필수: 우선순위
+  category: TaskCategory;        // 필수: 카테고리
+  dueDate?: Date;               // 옵션: 마감일
+  assignedTo?: string;          // 옵션: 담당자
+  tags?: string[];              // 옵션: 태그 (기본값: 빈 배열)
+  estimatedHours?: number;      // 옵션: 예상 소요 시간
+}
+
+/**
+ * 작업 업데이트 요청 인터페이스
+ * 모든 필드가 옵션이라 부분 업데이트 가능함
+ */
+interface UpdateTaskRequest {
+  title?: string;               // 옵션: 작업 제목
+  description?: string;         // 옵션: 작업 설명
+  priority?: TaskPriority;      // 옵션: 우선순위
+  status?: TaskStatus;          // 옵션: 상태
+  category?: TaskCategory;      // 옵션: 카테고리
+  dueDate?: Date;              // 옵션: 마감일
+  assignedTo?: string;         // 옵션: 담당자
+  tags?: string[];             // 옵션: 태그
+  estimatedHours?: number;     // 옵션: 예상 소요 시간
+  actualHours?: number;        // 옵션: 실제 소요 시간
+}
+
+/**
+ * 작업 필터링 옵션 인터페이스
+ * 유저가 작업 검색하고 필터링할 때 씀
+ */
+interface TaskFilter {
+  status?: TaskStatus[];        // 상태별 필터링
+  priority?: TaskPriority[];    // 우선순위별 필터링
+  category?: TaskCategory[];    // 카테고리별 필터링
+  assignedTo?: string;         // 담당자별 필터링
+  dueDateFrom?: Date;          // 마감일 시작 범위
+  dueDateTo?: Date;            // 마감일 종료 범위
+  searchTerm?: string;         // 검색어 (제목, 설명에서 검색)
+  tags?: string[];             // 태그별 필터링
+}
+
+/**
+ * 작업 정렬 옵션 인터페이스
+ * 유저가 작업 목록 정렬할 때 씀
+ */
+interface TaskSortOptions {
+  field: keyof Task;           // 정렬할 필드명
+  direction: 'asc' | 'desc';   // 정렬 방향 (오름차순/내림차순)
+}
+
+/**
+ * 작업 통계 정보 인터페이스
+ * 대시보드에서 쓸 통계 데이터 정의함
+ */
+interface TaskStatistics {
+  totalTasks: number;          // 전체 작업 수
+  completedTasks: number;      // 완료된 작업 수
+  pendingTasks: number;        // 대기 중인 작업 수
+  overdueTasks: number;        // 지연된 작업 수
+  tasksByPriority: Record<TaskPriority, number>;    // 우선순위별 작업 수
+  tasksByCategory: Record<TaskCategory, number>;    // 카테고리별 작업 수
+  tasksByStatus: Record<TaskStatus, number>;        // 상태별 작업 수
+  averageCompletionTime: number;                    // 평균 완료 시간
+}
+
+// ==================== 유틸리티 함수 섹션 ====================
+// 작업 관리에 필요한 유틸 함수들 정의함
+
+/**
+ * UUID 생성 함수
+ * 작업 고유 식별자 생성할 때 씀
+ * @returns 고유한 UUID 문자열
+ */
+function generateUUID(): string {
+  // 간단한 UUID v4 생성 로직
+  // 실제 프로덕션에서는 crypto.randomUUID()나 uuid 라이브러리 쓰는게 좋음
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+/**
+ * 날짜가 오늘 이후인지 확인하는 함수
+ * 마감일 지났는지 확인할 때 씀
+ * @param date 확인할 날짜
+ * @returns 날짜가 오늘 이후면 true, 아니면 false
+ */
+function isDateAfterToday(date: Date): boolean {
+  const today = new Date();
+  // 시간 부분 제거하고 날짜만 비교함
+  today.setHours(0, 0, 0, 0);
+  return date.getTime() > today.getTime();
+}
+
+/**
+ * 두 날짜 사이 일수 계산하는 함수
+ * 마감일까지 남은 일수 계산할 때 씀
+ * @param startDate 시작 날짜
+ * @param endDate 종료 날짜
+ * @returns 두 날짜 사이의 일수
+ */
+function getDaysBetween(startDate: Date, endDate: Date): number {
+  const timeDiff = endDate.getTime() - startDate.getTime();
+  return Math.ceil(timeDiff / (1000 * 3600 * 24));
+}
+
+/**
+ * 문자열에서 특정 검색어 찾는 함수 (대소문자 구분 안함)
+ * 작업 검색 기능에서 씀
+ * @param text 검색 대상 문자열
+ * @param searchTerm 검색어
+ * @returns 검색어가 포함되어 있으면 true, 아니면 false
+ */
+function includesIgnoreCase(text: string, searchTerm: string): boolean {
+  return text.toLowerCase().includes(searchTerm.toLowerCase());
+}
+
+// ==================== 메인 클래스 섹션 ====================
+// 작업 관리 시스템의 핵심 로직 담당하는 클래스 정의함
+
+/**
+ * 작업 관리 시스템의 메인 클래스
+ * 모든 작업 관련 기능 담당함
+ */
+class TaskManager {
+  // 클래스의 private 속성들
+  private tasks: Task[] = [];           // 작업 목록 저장하는 배열
+  private nextId: number = 1;           // 다음 작업 ID (UUID 대신 간단한 카운터 사용)
+
+  /**
+   * 클래스 생성자
+   * 초기 작업 목록 받아서 설정할 수 있음
+   * @param initialTasks 초기 작업 목록 (옵션)
+   */
+  constructor(initialTasks: Task[] = []) {
+    this.tasks = [...initialTasks];     // 배열 복사해서 불변성 보장함
+    // 기존 작업 중 가장 큰 ID 찾아서 nextId 설정함
+    this.nextId = this.tasks.length > 0 
+      ? Math.max(...this.tasks.map(task => parseInt(task.id))) + 1 
+      : 1;
+  }
+
+  /**
+   * 새로운 작업 생성하는 메서드
+   * CreateTaskRequest 인터페이스 따르는 데이터 받아서 새 작업 생성함
+   * @param taskData 생성할 작업의 데이터
+   * @returns 생성된 작업 객체
+   */
+  createTask(taskData: CreateTaskRequest): Task {
+    // 현재 시간을 생성 시간으로 설정함
+    const now = new Date();
+    
+    // 새로운 작업 객체 생성함
+    const newTask: Task = {
+      id: generateUUID(),                    // 고유 ID 생성함
+      title: taskData.title,                 // 제목 설정함
+      description: taskData.description,     // 설명 설정함 (옵션)
+      priority: taskData.priority,           // 우선순위 설정함
+      status: TaskStatus.TODO,               // 초기 상태는 TODO로 설정함
+      category: taskData.category,           // 카테고리 설정함
+      dueDate: taskData.dueDate,            // 마감일 설정함 (옵션)
+      createdAt: now,                       // 생성 시간 설정함
+      updatedAt: now,                       // 수정 시간 설정함 (초기에는 생성 시간과 동일)
+      assignedTo: taskData.assignedTo,      // 담당자 설정함 (옵션)
+      tags: taskData.tags || [],            // 태그 설정함 (기본값: 빈 배열)
+      estimatedHours: taskData.estimatedHours, // 예상 소요 시간 설정함 (옵션)
+      actualHours: undefined                 // 실제 소요 시간은 초기에는 undefined
+    };
+
+    // 작업 목록에 새 작업 추가함
+    this.tasks.push(newTask);
+    
+    // 생성된 작업 반환함
+    return newTask;
+  }
+
+  /**
+   * 기존 작업 업데이트하는 메서드
+   * 작업 ID와 업데이트할 데이터 받아서 작업 수정함
+   * @param taskId 업데이트할 작업의 ID
+   * @param updateData 업데이트할 데이터
+   * @returns 업데이트된 작업 객체 또는 null (작업 못 찾은 경우)
+   */
+  updateTask(taskId: string, updateData: UpdateTaskRequest): Task | null {
+    // 작업 ID로 작업 찾음
+    const taskIndex = this.tasks.findIndex(task => task.id === taskId);
+    
+    // 작업 못 찾은 경우 null 리턴함
+    if (taskIndex === -1) {
+      return null;
+    }
+
+    // 기존 작업 객체 가져옴
+    const existingTask = this.tasks[taskIndex];
+    
+    // 업데이트된 작업 객체 생성함 (스프레드 연산자로 기존 값 유지)
+    const updatedTask: Task = {
+      ...existingTask,                      // 기존 작업의 모든 속성 복사함
+      ...updateData,                        // 업데이트 데이터로 덮어씀
+      updatedAt: new Date()                 // 수정 시간 갱신함
+    };
+
+    // 작업 목록에서 업데이트된 작업으로 교체함
+    this.tasks[taskIndex] = updatedTask;
+    
+    // 업데이트된 작업 반환함
+    return updatedTask;
+  }
+
+  /**
+   * 작업 삭제하는 메서드
+   * 작업 ID 받아서 해당 작업 삭제함
+   * @param taskId 삭제할 작업의 ID
+   * @returns 삭제 성공 여부
+   */
+  deleteTask(taskId: string): boolean {
+    // 삭제 전 작업 목록 길이 저장함
+    const initialLength = this.tasks.length;
+    
+    // 해당 ID가 아닌 작업들만 필터링해서 삭제 효과냄
+    this.tasks = this.tasks.filter(task => task.id !== taskId);
+    
+    // 작업 목록 길이 바뀌었으면 삭제 성공임
+    return this.tasks.length < initialLength;
+  }
+
+  /**
+   * 작업 ID로 특정 작업 조회하는 메서드
+   * @param taskId 조회할 작업의 ID
+   * @returns 작업 객체 또는 undefined (작업 못 찾은 경우)
+   */
+  getTaskById(taskId: string): Task | undefined {
+    // find 메서드로 ID 일치하는 첫 번째 작업 반환함
+    return this.tasks.find(task => task.id === taskId);
+  }
+
+  /**
+   * 모든 작업 조회하는 메서드
+   * 필터링, 정렬 옵션 받아서 조건에 맞는 작업들 반환함
+   * @param filter 필터링 옵션 (옵션)
+   * @param sort 정렬 옵션 (옵션)
+   * @returns 조건에 맞는 작업 배열
+   */
+  getTasks(filter?: TaskFilter, sort?: TaskSortOptions): Task[] {
+    // 작업 목록 복사함 (불변성 보장)
+    let filteredTasks = [...this.tasks];
+
+    // 필터링 적용함
+    if (filter) {
+      filteredTasks = this.applyFilter(filteredTasks, filter);
+    }
+
+    // 정렬 적용함
+    if (sort) {
+      filteredTasks = this.applySort(filteredTasks, sort);
+    }
+
+    return filteredTasks;
+  }
+
+  /**
+   * 작업 목록에 필터 적용하는 private 메서드
+   * @param tasks 필터링할 작업 목록
+   * @param filter 적용할 필터 옵션
+   * @returns 필터링된 작업 목록
+   */
+  private applyFilter(tasks: Task[], filter: TaskFilter): Task[] {
+    return tasks.filter(task => {
+      // 상태 필터링함
+      if (filter.status && filter.status.length > 0) {
+        if (!filter.status.includes(task.status)) {
+          return false;
+        }
+      }
+
+      // 우선순위 필터링함
+      if (filter.priority && filter.priority.length > 0) {
+        if (!filter.priority.includes(task.priority)) {
+          return false;
+        }
+      }
+
+      // 카테고리 필터링함
+      if (filter.category && filter.category.length > 0) {
+        if (!filter.category.includes(task.category)) {
+          return false;
+        }
+      }
+
+      // 담당자 필터링함
+      if (filter.assignedTo) {
+        if (task.assignedTo !== filter.assignedTo) {
+          return false;
+        }
+      }
+
+      // 마감일 범위 필터링함
+      if (filter.dueDateFrom && task.dueDate) {
+        if (task.dueDate < filter.dueDateFrom) {
+          return false;
+        }
+      }
+
+      if (filter.dueDateTo && task.dueDate) {
+        if (task.dueDate > filter.dueDateTo) {
+          return false;
+        }
+      }
+
+      // 검색어 필터링함 (제목과 설명에서 검색)
+      if (filter.searchTerm) {
+        const searchTerm = filter.searchTerm;
+        const titleMatches = includesIgnoreCase(task.title, searchTerm);
+        const descriptionMatches = task.description && 
+          includesIgnoreCase(task.description, searchTerm);
+        
+        if (!titleMatches && !descriptionMatches) {
+          return false;
+        }
+      }
+
+      // 태그 필터링함
+      if (filter.tags && filter.tags.length > 0) {
+        const hasMatchingTag = filter.tags.some(filterTag => 
+          task.tags.includes(filterTag)
+        );
+        if (!hasMatchingTag) {
+          return false;
+        }
+      }
+
+      // 모든 필터 조건 통과한 경우 true 반환함
+      return true;
+    });
+  }
+
+  /**
+   * 작업 목록에 정렬 적용하는 private 메서드
+   * @param tasks 정렬할 작업 목록
+   * @param sort 정렬 옵션
+   * @returns 정렬된 작업 목록
+   */
+  private applySort(tasks: Task[], sort: TaskSortOptions): Task[] {
+    return tasks.sort((a, b) => {
+      // 정렬할 필드의 값 가져옴
+      const aValue = a[sort.field];
+      const bValue = b[sort.field];
+
+      // undefined 값 처리함
+      if (aValue === undefined && bValue === undefined) return 0;
+      if (aValue === undefined) return 1;
+      if (bValue === undefined) return -1;
+
+      // 날짜 타입 처리함
+      if (aValue instanceof Date && bValue instanceof Date) {
+        const comparison = aValue.getTime() - bValue.getTime();
+        return sort.direction === 'asc' ? comparison : -comparison;
+      }
+
+      // 숫자 타입 처리함
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        const comparison = aValue - bValue;
+        return sort.direction === 'asc' ? comparison : -comparison;
+      }
+
+      // 문자열 타입 처리함
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        const comparison = aValue.localeCompare(bValue);
+        return sort.direction === 'asc' ? comparison : -comparison;
+      }
+
+      // 기타 타입은 문자열로 변환해서 비교함
+      const aString = String(aValue);
+      const bString = String(bValue);
+      const comparison = aString.localeCompare(bString);
+      return sort.direction === 'asc' ? comparison : -comparison;
+    });
+  }
+
+  /**
+   * 작업 통계 계산하는 메서드
+   * 대시보드에서 쓸 통계 정보 생성함
+   * @returns 작업 통계 객체
+   */
+  getStatistics(): TaskStatistics {
+    const now = new Date();
+    
+    // 기본 통계 계산함
+    const totalTasks = this.tasks.length;
+    const completedTasks = this.tasks.filter(task => task.status === TaskStatus.COMPLETED).length;
+    const pendingTasks = this.tasks.filter(task => task.status !== TaskStatus.COMPLETED).length;
+    
+    // 지연된 작업 계산함 (마감일 지났는데 완료 안된 작업)
+    const overdueTasks = this.tasks.filter(task => 
+      task.dueDate && 
+      task.dueDate < now && 
+      task.status !== TaskStatus.COMPLETED
+    ).length;
+
+    // 우선순위별 작업 수 계산함
+    const tasksByPriority: Record<TaskPriority, number> = {
+      [TaskPriority.LOW]: 0,
+      [TaskPriority.MEDIUM]: 0,
+      [TaskPriority.HIGH]: 0,
+      [TaskPriority.URGENT]: 0
+    };
+
+    // 카테고리별 작업 수 계산함
+    const tasksByCategory: Record<TaskCategory, number> = {
+      [TaskCategory.WORK]: 0,
+      [TaskCategory.PERSONAL]: 0,
+      [TaskCategory.STUDY]: 0,
+      [TaskCategory.HEALTH]: 0,
+      [TaskCategory.FINANCE]: 0
+    };
+
+    // 상태별 작업 수 계산함
+    const tasksByStatus: Record<TaskStatus, number> = {
+      [TaskStatus.TODO]: 0,
+      [TaskStatus.IN_PROGRESS]: 0,
+      [TaskStatus.COMPLETED]: 0,
+      [TaskStatus.CANCELLED]: 0
+    };
+
+    // 각 작업 순회하면서 통계 계산함
+    this.tasks.forEach(task => {
+      tasksByPriority[task.priority]++;
+      tasksByCategory[task.category]++;
+      tasksByStatus[task.status]++;
+    });
+
+    // 평균 완료 시간 계산함
+    const completedTasksWithHours = this.tasks.filter(task => 
+      task.status === TaskStatus.COMPLETED && task.actualHours
+    );
+    const averageCompletionTime = completedTasksWithHours.length > 0
+      ? completedTasksWithHours.reduce((sum, task) => sum + (task.actualHours || 0), 0) / completedTasksWithHours.length
+      : 0;
+
+    // 통계 객체 반환함
+    return {
+      totalTasks,
+      completedTasks,
+      pendingTasks,
+      overdueTasks,
+      tasksByPriority,
+      tasksByCategory,
+      tasksByStatus,
+      averageCompletionTime
+    };
+  }
+
+  /**
+   * 마감일 임박한 작업들 조회하는 메서드
+   * @param daysAhead 앞으로 며칠 이내의 마감일 확인할지 (기본값: 7일)
+   * @returns 마감일 임박한 작업 목록
+   */
+  getUpcomingTasks(daysAhead: number = 7): Task[] {
+    const now = new Date();
+    const futureDate = new Date(now.getTime() + (daysAhead * 24 * 60 * 60 * 1000));
+
+    return this.tasks.filter(task => 
+      task.dueDate && 
+      task.dueDate >= now && 
+      task.dueDate <= futureDate &&
+      task.status !== TaskStatus.COMPLETED
+    ).sort((a, b) => {
+      // 마감일 순으로 정렬함
+      if (!a.dueDate || !b.dueDate) return 0;
+      return a.dueDate.getTime() - b.dueDate.getTime();
+    });
+  }
+
+  /**
+   * 특정 담당자에게 할당된 작업들 조회하는 메서드
+   * @param assignee 담당자 이름
+   * @returns 해당 담당자한테 할당된 작업 목록
+   */
+  getTasksByAssignee(assignee: string): Task[] {
+    return this.tasks.filter(task => task.assignedTo === assignee);
+  }
+
+  /**
+   * 작업을 다른 담당자에게 재할당하는 메서드
+   * @param taskId 재할당할 작업의 ID
+   * @param newAssignee 새로운 담당자
+   * @returns 재할당된 작업 객체 또는 null
+   */
+  reassignTask(taskId: string, newAssignee: string): Task | null {
+    return this.updateTask(taskId, { assignedTo: newAssignee });
+  }
+
+  /**
+   * 작업에 태그 추가하는 메서드
+   * @param taskId 태그 추가할 작업의 ID
+   * @param tags 추가할 태그 배열
+   * @returns 업데이트된 작업 객체 또는 null
+   */
+  addTagsToTask(taskId: string, tags: string[]): Task | null {
+    const task = this.getTaskById(taskId);
+    if (!task) return null;
+
+    // 기존 태그와 새 태그 합치고 중복 제거함
+    const updatedTags = Array.from(new Set([...task.tags, ...tags]));
+    
+    return this.updateTask(taskId, { tags: updatedTags });
+  }
+
+  /**
+   * 작업에서 태그 제거하는 메서드
+   * @param taskId 태그 제거할 작업의 ID
+   * @param tagsToRemove 제거할 태그 배열
+   * @returns 업데이트된 작업 객체 또는 null
+   */
+  removeTagsFromTask(taskId: string, tagsToRemove: string[]): Task | null {
+    const task = this.getTaskById(taskId);
+    if (!task) return null;
+
+    // 제거할 태그들 제외한 태그 배열 생성함
+    const updatedTags = task.tags.filter(tag => !tagsToRemove.includes(tag));
+    
+    return this.updateTask(taskId, { tags: updatedTags });
+  }
+
+  /**
+   * 작업 완료 처리하는 메서드
+   * @param taskId 완료 처리할 작업의 ID
+   * @param actualHours 실제 소요 시간 (옵션)
+   * @returns 업데이트된 작업 객체 또는 null
+   */
+  completeTask(taskId: string, actualHours?: number): Task | null {
+    const updateData: UpdateTaskRequest = {
+      status: TaskStatus.COMPLETED
+    };
+
+    // 실제 소요 시간 제공된 경우 추가함
+    if (actualHours !== undefined) {
+      updateData.actualHours = actualHours;
+    }
+
+    return this.updateTask(taskId, updateData);
+  }
+
+  /**
+   * 작업 목록을 JSON 형태로 내보내는 메서드
+   * 데이터 백업이나 이전에 쓸 수 있음
+   * @returns 작업 목록의 JSON 문자열
+   */
+  exportToJSON(): string {
+    return JSON.stringify(this.tasks, null, 2);
+  }
+
+  /**
+   * JSON에서 작업 목록 가져오는 메서드
+   * 백업된 데이터 복원할 때 씀
+   * @param jsonData JSON 문자열
+   * @returns 가져오기 성공 여부
+   */
+  importFromJSON(jsonData: string): boolean {
+    try {
+      const parsedTasks = JSON.parse(jsonData);
+      
+      // 배열인지 확인함
+      if (!Array.isArray(parsedTasks)) {
+        return false;
+      }
+
+      // 각 작업이 필수 속성을 가지고 있는지 검증함
+      const isValidTaskArray = parsedTasks.every(task => 
+        task.id && 
+        task.title && 
+        task.priority && 
+        task.status && 
+        task.category
+      );
+
+      if (!isValidTaskArray) {
+        return false;
+      }
+
+      // Date 객체로 변환함
+      const formattedTasks = parsedTasks.map(task => ({
+        ...task,
+        createdAt: new Date(task.createdAt),
+        updatedAt: new Date(task.updatedAt),
+        dueDate: task.dueDate ? new Date(task.dueDate) : undefined
+      }));
+
+      this.tasks = formattedTasks;
+      return true;
+    } catch (error) {
+      return false;
+    }
