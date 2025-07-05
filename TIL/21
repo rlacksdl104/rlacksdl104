@@ -1291,6 +1291,207 @@ class TaskManager {
       // 각 작업이 필수 속성을 가지고 있는지 검증함
       const isValidTaskArray = parsedTasks.every(task => 
         task.id && 
+
+        task.title && 
+        task.priority && 
+        task.status && 
+        task.category
+      );
+
+      if (!isValidTaskArray) {
+        return false;
+      }
+
+      // Date 객체로 변환함
+      const formattedTasks = parsedTasks.map(task => ({
+        ...task,
+        createdAt: new Date(task.createdAt),
+        updatedAt: new Date(task.updatedAt),
+        dueDate: task.dueDate ? new Date(task.dueDate) : undefined
+      }));
+
+      this.tasks = formattedTasks;
+      return true;
+    } catch (error) {
+  /**
+   * 작업에 태그 추가하는 메서드
+   * @param taskId 태그 추가할 작업의 ID
+   * @param tags 추가할 태그 배열
+   * @returns 업데이트된 작업 객체 또는 null
+   */
+  addTagsToTask(taskId: string, tags: string[]): Task | null {
+    const task = this.getTaskById(taskId);
+    if (!task) return null;
+
+    // 기존 태그와 새 태그 합치고 중복 제거함
+    const updatedTags = Array.from(new Set([...task.tags, ...tags]));
+    
+    return this.updateTask(taskId, { tags: updatedTags });
+  }
+
+  /**
+   * 작업에서 태그 제거하는 메서드
+   * @param taskId 태그 제거할 작업의 ID
+   * @param tagsToRemove 제거할 태그 배열
+   * @returns 업데이트된 작업 객체 또는 null
+   */
+  removeTagsFromTask(taskId: string, tagsToRemove: string[]): Task | null {
+    const task = this.getTaskById(taskId);
+    if (!task) return null;
+
+    // 제거할 태그들 제외한 태그 배열 생성함
+    const updatedTags = task.tags.filter(tag => !tagsToRemove.includes(tag));
+    
+    return this.updateTask(taskId, { tags: updatedTags });
+  }
+
+  /**
+   * 작업 완료 처리하는 메서드
+   * @param taskId 완료 처리할 작업의 ID
+   * @param actualHours 실제 소요 시간 (옵션)
+   * @returns 업데이트된 작업 객체 또는 null
+   */
+  completeTask(taskId: string, actualHours?: number): Task | null {
+    const updateData: UpdateTaskRequest = {
+      status: TaskStatus.COMPLETED
+    };
+
+    // 실제 소요 시간 제공된 경우 추가함
+    if (actualHours !== undefined) {
+      updateData.actualHours = actualHours;
+    }
+
+    return this.updateTask(taskId, updateData);
+  }
+
+  /**
+   * 작업 목록을 JSON 형태로 내보내는 메서드
+   * 데이터 백업이나 이전에 쓸 수 있음
+   * @returns 작업 목록의 JSON 문자열
+   */
+  exportToJSON(): string {
+    return JSON.stringify(this.tasks, null, 2);
+  }
+
+  /**
+   * JSON에서 작업 목록 가져오는 메서드
+   * 백업된 데이터 복원할 때 씀
+   * @param jsonData JSON 문자열
+   * @returns 가져오기 성공 여부
+   */
+  importFromJSON(jsonData: string): boolean {
+    try {
+      const parsedTasks = JSON.parse(jsonData);
+      
+      // 배열인지 확인함
+      if (!Array.isArray(parsedTasks)) {
+        return false;
+      }
+
+      // 각 작업이 필수 속성을 가지고 있는지 검증함
+      const isValidTaskArray = parsedTasks.every(task => 
+        task.id && 
+
+        task.title && 
+        task.priority && 
+        task.status && 
+        task.category
+      );
+
+      if (!isValidTaskArray) {
+        return false;
+      }
+
+      // Date 객체로 변환함
+      const formattedTasks = parsedTasks.map(task => ({
+        ...task,
+        createdAt: new Date(task.createdAt),
+        updatedAt: new Date(task.updatedAt),
+        dueDate: task.dueDate ? new Date(task.dueDate) : undefined
+      }));
+
+      this.tasks = formattedTasks;
+      return true;
+    } catch (error) {
+  /**
+   * 작업에 태그 추가하는 메서드
+   * @param taskId 태그 추가할 작업의 ID
+   * @param tags 추가할 태그 배열
+   * @returns 업데이트된 작업 객체 또는 null
+   */
+  addTagsToTask(taskId: string, tags: string[]): Task | null {
+    const task = this.getTaskById(taskId);
+    if (!task) return null;
+
+    // 기존 태그와 새 태그 합치고 중복 제거함
+    const updatedTags = Array.from(new Set([...task.tags, ...tags]));
+    
+    return this.updateTask(taskId, { tags: updatedTags });
+  }
+
+  /**
+   * 작업에서 태그 제거하는 메서드
+   * @param taskId 태그 제거할 작업의 ID
+   * @param tagsToRemove 제거할 태그 배열
+   * @returns 업데이트된 작업 객체 또는 null
+   */
+  removeTagsFromTask(taskId: string, tagsToRemove: string[]): Task | null {
+    const task = this.getTaskById(taskId);
+    if (!task) return null;
+
+    // 제거할 태그들 제외한 태그 배열 생성함
+    const updatedTags = task.tags.filter(tag => !tagsToRemove.includes(tag));
+    
+    return this.updateTask(taskId, { tags: updatedTags });
+  }
+
+  /**
+   * 작업 완료 처리하는 메서드
+   * @param taskId 완료 처리할 작업의 ID
+   * @param actualHours 실제 소요 시간 (옵션)
+   * @returns 업데이트된 작업 객체 또는 null
+   */
+  completeTask(taskId: string, actualHours?: number): Task | null {
+    const updateData: UpdateTaskRequest = {
+      status: TaskStatus.COMPLETED
+    };
+
+    // 실제 소요 시간 제공된 경우 추가함
+    if (actualHours !== undefined) {
+      updateData.actualHours = actualHours;
+    }
+
+    return this.updateTask(taskId, updateData);
+  }
+
+  /**
+   * 작업 목록을 JSON 형태로 내보내는 메서드
+   * 데이터 백업이나 이전에 쓸 수 있음
+   * @returns 작업 목록의 JSON 문자열
+   */
+  exportToJSON(): string {
+    return JSON.stringify(this.tasks, null, 2);
+  }
+
+  /**
+   * JSON에서 작업 목록 가져오는 메서드
+   * 백업된 데이터 복원할 때 씀
+   * @param jsonData JSON 문자열
+   * @returns 가져오기 성공 여부
+   */
+  importFromJSON(jsonData: string): boolean {
+    try {
+      const parsedTasks = JSON.parse(jsonData);
+      
+      // 배열인지 확인함
+      if (!Array.isArray(parsedTasks)) {
+        return false;
+      }
+
+      // 각 작업이 필수 속성을 가지고 있는지 검증함
+      const isValidTaskArray = parsedTasks.every(task => 
+        task.id && 
+
         task.title && 
         task.priority && 
         task.status && 
